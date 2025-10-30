@@ -27,9 +27,6 @@ public class HomeController {
     // METODE-METODE MIGRASI DARI PRAKTIKUM 1
     // ====================================================================
 
-    /**
-     * Studi Kasus 1: Informasi NIM
-     */
     @GetMapping("/informasi-nim/{nim}")
     public String informasiNim(@PathVariable String nim) {
         Map<String, String> programStudi = new HashMap<>();
@@ -60,9 +57,6 @@ public class HomeController {
         );
     }
 
-    /**
-     * Studi Kasus 2: Perolehan Nilai
-     */
     @GetMapping("/perolehan-nilai/{strBase64}")
     public String perolehanNilai(@PathVariable String strBase64) {
         Locale.setDefault(Locale.US);
@@ -148,9 +142,6 @@ public class HomeController {
         else return "E";
     }
 
-    /**
-     * Studi Kasus 3: Perbedaan L dan Kebalikannya
-     */
     @GetMapping("/perbedaan-l/{strBase64}")
     public String perbedaanL(@PathVariable String strBase64) {
         byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
@@ -219,9 +210,6 @@ public class HomeController {
         return result.toString();
     }
 
-    /**
-     * Studi Kasus 4: Paling Ter
-     */
     @GetMapping("/paling-ter/{strBase64}")
     public String palingTer(@PathVariable String strBase64) {
         byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
