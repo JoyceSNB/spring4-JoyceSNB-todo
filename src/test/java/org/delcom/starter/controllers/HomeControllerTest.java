@@ -71,17 +71,24 @@ class HomeControllerUnitTest {
     }
     
     @Test
-    @DisplayName("Test Perbedaan L - Should cover all N sizes")
-    void perbedaanL_ShouldCoverAllNSizes() {
+    @DisplayName("Test Perbedaan L - Should cover all N sizes and dominant cases")
+    void perbedaanL_ShouldCoverAllCases() {
         HomeController controller = new HomeController();
+        // N=1
         String input1 = "1\n5";
         assertEquals("Nilai L: Tidak Ada<br/>Nilai Kebalikan L: Tidak Ada<br/>Nilai Tengah: 5<br/>Perbedaan: Tidak Ada<br/>Dominan: 5", controller.perbedaanL(Base64.getEncoder().encodeToString(input1.getBytes())));
+        // N=2
         String input2 = "2\n1 2\n3 4";
         assertEquals("Nilai L: Tidak Ada<br/>Nilai Kebalikan L: Tidak Ada<br/>Nilai Tengah: 10<br/>Perbedaan: Tidak Ada<br/>Dominan: 10", controller.perbedaanL(Base64.getEncoder().encodeToString(input2.getBytes())));
+        // N=3 (Dominan: Tengah)
         String input3 = "3\n1 2 3\n4 5 6\n7 8 9";
         assertTrue(controller.perbedaanL(Base64.getEncoder().encodeToString(input3.getBytes())).contains("Dominan: 5"));
+        // N=4 (Dominan: L)
         String input4 = "4\n10 1 1 1\n10 1 1 1\n10 1 1 1\n10 1 1 1";
         assertTrue(controller.perbedaanL(Base64.getEncoder().encodeToString(input4.getBytes())).contains("Dominan: 42"));
+        // TES BARU: N=3 (Dominan: Kebalikan L)
+        String input5 = "3\n1 10 10\n1 1 10\n1 1 10"; // NilaiL=4, NilaiKebalikanL=40
+        assertTrue(controller.perbedaanL(Base64.getEncoder().encodeToString(input5.getBytes())).contains("Dominan: 40"));
     }
 
     @Test
