@@ -103,7 +103,6 @@ class HomeControllerUnitTest {
         assertEquals(expected, result);
     }
 
-    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
     @Test
     @DisplayName("Test Perbedaan L - Should handle N=1 case")
     void perbedaanL_ShouldHandleN1() {
@@ -118,7 +117,6 @@ class HomeControllerUnitTest {
         assertEquals(expected, controller.perbedaanL(base64Input));
     }
 
-    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
     @Test
     @DisplayName("Test Perbedaan L - Should handle N=2 case")
     void perbedaanL_ShouldHandleN2() {
@@ -137,7 +135,7 @@ class HomeControllerUnitTest {
     @DisplayName("Test Paling Ter - Should find all 'Ter' values")
     void palingTer_ShouldFindAllTerValues() {
         // Arrange
-        HomeController controller = new HomeController();
+        HomeController controller = new HomeController(); // <-- INI YANG DIPERBAIKI
         String plainInput = "7\n" +
                             "8\n" +
                             "7\n" +
@@ -160,7 +158,6 @@ class HomeControllerUnitTest {
         assertEquals(expected, result);
     }
 
-    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
     @Test
     @DisplayName("Test Paling Ter - Should handle empty input")
     void palingTer_ShouldHandleEmptyInput() {

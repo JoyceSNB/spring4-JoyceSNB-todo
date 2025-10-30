@@ -91,12 +91,12 @@ public class HomeController {
             int nilai = Integer.parseInt(data[2]);
 
             switch (kategori) {
-                case "PA" -> { maxPA += max; sumPA += nilai; }
-                case "T" -> { maxT += max; sumT += nilai; }
-                case "K" -> { maxK += max; sumK += nilai; }
-                case "P" -> { maxP += max; sumP += nilai; }
-                case "UTS" -> { maxUTS += max; sumUTS += nilai; }
-                case "UAS" -> { maxUAS += max; sumUAS += nilai; }
+                case "PA": maxPA += max; sumPA += nilai; break;
+                case "T": maxT += max; sumT += nilai; break;
+                case "K": maxK += max; sumK += nilai; break;
+                case "P": maxP += max; sumP += nilai; break;
+                case "UTS": maxUTS += max; sumUTS += nilai; break;
+                case "UAS": maxUAS += max; sumUAS += nilai; break;
             }
         }
 
