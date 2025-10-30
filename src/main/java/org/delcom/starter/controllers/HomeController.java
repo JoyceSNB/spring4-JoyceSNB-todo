@@ -84,6 +84,7 @@ public class HomeController {
             int max = Integer.parseInt(data[1]);
             int nilai = Integer.parseInt(data[2]);
 
+            // PERBAIKAN: Menambahkan 'default' untuk mencakup semua cabang
             switch (kategori) {
                 case "PA": maxPA += max; sumPA += nilai; break;
                 case "T": maxT += max; sumT += nilai; break;
@@ -91,6 +92,8 @@ public class HomeController {
                 case "P": maxP += max; sumP += nilai; break;
                 case "UTS": maxUTS += max; sumUTS += nilai; break;
                 case "UAS": maxUAS += max; sumUAS += nilai; break;
+                default: // Menangani kategori yang tidak dikenal agar cabang ter-cover
+                    break;
             }
         }
 
