@@ -81,7 +81,7 @@ class HomeControllerUnitTest {
     }
     
     @Test
-    @DisplayName("Test Perbedaan L - Should calculate L differences")
+    @DisplayName("Test Perbedaan L - Should calculate L differences for N=3")
     void perbedaanL_ShouldCalculateDifferences() {
         // Arrange
         HomeController controller = new HomeController();
@@ -101,6 +101,36 @@ class HomeControllerUnitTest {
 
         // Assert
         assertEquals(expected, result);
+    }
+
+    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
+    @Test
+    @DisplayName("Test Perbedaan L - Should handle N=1 case")
+    void perbedaanL_ShouldHandleN1() {
+        HomeController controller = new HomeController();
+        String plainInput = "1\n5";
+        String base64Input = Base64.getEncoder().encodeToString(plainInput.getBytes());
+        String expected = "Nilai L: Tidak Ada<br/>" +
+                          "Nilai Kebalikan L: Tidak Ada<br/>" +
+                          "Nilai Tengah: 5<br/>" +
+                          "Perbedaan: Tidak Ada<br/>" +
+                          "Dominan: 5";
+        assertEquals(expected, controller.perbedaanL(base64Input));
+    }
+
+    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
+    @Test
+    @DisplayName("Test Perbedaan L - Should handle N=2 case")
+    void perbedaanL_ShouldHandleN2() {
+        HomeController controller = new HomeController();
+        String plainInput = "2\n1 2\n3 4";
+        String base64Input = Base64.getEncoder().encodeToString(plainInput.getBytes());
+        String expected = "Nilai L: Tidak Ada<br/>" +
+                          "Nilai Kebalikan L: Tidak Ada<br/>" +
+                          "Nilai Tengah: 10<br/>" +
+                          "Perbedaan: Tidak Ada<br/>" +
+                          "Dominan: 10";
+        assertEquals(expected, controller.perbedaanL(base64Input));
     }
 
     @Test
@@ -128,5 +158,16 @@ class HomeControllerUnitTest {
         
         // Assert
         assertEquals(expected, result);
+    }
+
+    // --- TES BARU UNTUK MENCAKUP SEMUA CABANG ---
+    @Test
+    @DisplayName("Test Paling Ter - Should handle empty input")
+    void palingTer_ShouldHandleEmptyInput() {
+        HomeController controller = new HomeController();
+        String plainInput = "---";
+        String base64Input = Base64.getEncoder().encodeToString(plainInput.getBytes());
+        String expected = "Tidak ada data untuk diproses.";
+        assertEquals(expected, controller.palingTer(base64Input));
     }
 }
