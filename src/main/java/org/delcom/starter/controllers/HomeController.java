@@ -8,6 +8,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Locale;
 
 @RestController
@@ -27,9 +29,6 @@ public class HomeController {
     // METODE-METODE MIGRASI DARI PRAKTIKUM 1
     // ====================================================================
 
-    /**
-     * Studi Kasus 1: Informasi NIM
-     */
     @GetMapping("/informasi-nim/{nim}")
     public String informasiNim(@PathVariable String nim) {
         Map<String, String> programStudi = new HashMap<>();
@@ -60,9 +59,6 @@ public class HomeController {
         );
     }
 
-    /**
-     * Studi Kasus 2: Perolehan Nilai
-     */
     @GetMapping("/perolehan-nilai/{strBase64}")
     public String perolehanNilai(@PathVariable String strBase64) {
         Locale.setDefault(Locale.US);
@@ -70,18 +66,17 @@ public class HomeController {
         String decodedString = new String(decodedBytes);
         String[] lines = decodedString.split("\\r?\\n");
 
-        String[] weights = lines[0].split(" ");
-        int wPA = Integer.parseInt(weights[0]);
-        int wT = Integer.parseInt(weights[1]);
-        int wK = Integer.parseInt(weights[2]);
-        int wP = Integer.parseInt(weights[3]);
-        int wUTS = Integer.parseInt(weights[4]);
-        int wUAS = Integer.parseInt(weights[5]);
+        int wPA = Integer.parseInt(lines[0]);
+        int wT = Integer.parseInt(lines[1]);
+        int wK = Integer.parseInt(lines[2]);
+        int wP = Integer.parseInt(lines[3]);
+        int wUTS = Integer.parseInt(lines[4]);
+        int wUAS = Integer.parseInt(lines[5]);
 
         int sumPA = 0, maxPA = 0, sumT = 0, maxT = 0, sumK = 0, maxK = 0;
         int sumP = 0, maxP = 0, sumUTS = 0, maxUTS = 0, sumUAS = 0, maxUAS = 0;
 
-        for (int i = 1; i < lines.length; i++) {
+        for (int i = 6; i < lines.length; i++) {
             String baris = lines[i].trim();
             if (baris.equals("---")) break;
 
@@ -90,7 +85,6 @@ public class HomeController {
             int max = Integer.parseInt(data[1]);
             int nilai = Integer.parseInt(data[2]);
 
-            // PERBAIKAN: Menambahkan 'default' untuk mencakup semua cabang
             switch (kategori) {
                 case "PA": maxPA += max; sumPA += nilai; break;
                 case "T": maxT += max; sumT += nilai; break;
@@ -98,7 +92,7 @@ public class HomeController {
                 case "P": maxP += max; sumP += nilai; break;
                 case "UTS": maxUTS += max; sumUTS += nilai; break;
                 case "UAS": maxUAS += max; sumUAS += nilai; break;
-                default: // Menangani kategori yang tidak dikenal agar cabang ter-cover
+                default:
                     break;
             }
         }
@@ -151,9 +145,6 @@ public class HomeController {
         else return "E";
     }
 
-    /**
-     * Studi Kasus 3: Perbedaan L dan Kebalikannya
-     */
     @GetMapping("/perbedaan-l/{strBase64}")
     public String perbedaanL(@PathVariable String strBase64) {
         byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
@@ -222,9 +213,6 @@ public class HomeController {
         return result.toString();
     }
 
-    /**
-     * Studi Kasus 4: Paling Ter
-     */
     @GetMapping("/paling-ter/{strBase64}")
     public String palingTer(@PathVariable String strBase64) {
         byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
@@ -287,9 +275,12 @@ public class HomeController {
         int nilaiJumlahTertinggi = -1, jumlahTertinggi = -1;
         int nilaiJumlahTerendah = -1, jumlahTerendah = Integer.MAX_VALUE;
 
-        for (Map.Entry<Integer, Integer> entry : freqMap.entrySet()) {
-            int angka = entry.getKey();
-            int frek = entry.getValue();
+        // PERBAIKAN: Menggunakan Set untuk iterasi yang deterministik/pasti
+        Set<Integer> visited = new HashSet<>();
+        for (int angka : listAngka) { // Iterasi berdasarkan urutan masukan
+            if (visited.contains(angka)) continue; // Hanya proses angka unik
+
+            int frek = freqMap.get(angka);
             int jumlah = angka * frek;
 
             if (jumlah > jumlahTertinggi) {
@@ -309,6 +300,8 @@ public class HomeController {
                     nilaiJumlahTerendah = angka;
                 }
             }
+            
+            visited.add(angka); // Tandai angka ini sudah diproses
         }
 
         return String.format(
