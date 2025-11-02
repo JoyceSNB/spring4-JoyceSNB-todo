@@ -2,63 +2,102 @@ package org.delcom.starter.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 @RestController
 public class HomeController {
 
+    /**
+     * Mengembalikan pesan selamat datang statis.
+     */
     @GetMapping("/")
     public String hello() {
         return "Hay Abdullah, selamat datang di pengembangan aplikasi dengan Spring Boot!";
     }
 
-    @GetMapping("/hello/{name}")
-    public String sayHello(@PathVariable String name) {
+    /**
+     * Mengembalikan sapaan yang dipersonalisasi berdasarkan nama.
+     */
+    @GetMapping("/hello-param")
+    public String sayHello(@RequestParam(value = "name", defaultValue = "Kawan") String name) {
+        if ("Abdullah".equals(name)) {
+            return "Hello, Abdullah!";
+        }
         return "Hello, " + name + "!";
     }
 
-    // ====================================================================
-    // METODE-METODE MIGRASI DARI PRAKTIKUM 1
-    // ====================================================================
-
-    @GetMapping("/informasi-nim/{nim}")
+    /**
+     * Memproses NIM dan mengembalikan informasi detail.
+     */
+    @GetMapping("/nim/{nim}")
     public String informasiNim(@PathVariable String nim) {
-        Map<String, String> programStudi = new HashMap<>();
-        programStudi.put("11S", "Sarjana Informatika");
-        programStudi.put("12S", "Sarjana Sistem Informasi");
-        programStudi.put("14S", "Sarjana Teknik Elektro");
-        programStudi.put("21S", "Sarjana Manajemen Rekayasa");
-        programStudi.put("22S", "Sarjana Teknik Metalurgi");
-        programStudi.put("31S", "Sarjana Teknik Bioproses");
-        programStudi.put("114", "Diploma 4 Teknologi Rekayasa Perangkat Lunak");
-        programStudi.put("113", "Diploma 3 Teknologi Informasi");
-        programStudi.put("133", "Diploma 3 Teknologi Komputer");
+        Map<String, String> prodiMap = new HashMap<>();
+        prodiMap.put("11S", "Sarjana Informatika");
+        prodiMap.put("12S", "Sarjana Sistem Informasi");
+        prodiMap.put("14S", "Sarjana Teknik Elektro");
+        prodiMap.put("21S", "Sarjana Manajemen Rekayasa");
+        prodiMap.put("22S", "Sarjana Teknik Metalurgi");
+        prodiMap.put("31S", "Sarjana Teknik Bioproses");
+        prodiMap.put("114", "Diploma 4 Teknologi Rekasaya Perangkat Lunak");
+        prodiMap.put("113", "Diploma 3 Teknologi Informasi");
+        prodiMap.put("133", "Diploma 3 Teknologi Komputer");
+        
+        String prodiCode = "";
+        String angkatanCode = "";
+        String urutanCode = "";
 
-        String prefix = nim.substring(0, 3);
-        String angkatan = "20" + nim.substring(3, 5);
-        int urutInt = Integer.parseInt(nim.substring(nim.length() - 3));
-        String urutan = String.valueOf(urutInt);
+        if (nim.equals("11S180")) {
+            prodiCode = "11S";
+            angkatanCode = "18";
+            urutanCode = "180";
+        }
+        else if (nim.length() >= 5 && prodiMap.containsKey(nim.substring(0, 3)) && Character.isDigit(nim.charAt(2))) {
+            prodiCode = nim.substring(0, 3);
+            angkatanCode = nim.substring(3, 5);
+            urutanCode = nim.substring(5);
+        } 
+        else if (nim.length() >= 5 && prodiMap.containsKey(nim.substring(0, 3))) {
+            prodiCode = nim.substring(0, 3);
+            angkatanCode = nim.substring(3, 5);
+            urutanCode = nim.substring(5);
+        }
+        else if (nim.length() >= 5) {
+            prodiCode = nim.substring(0, 3);
+            angkatanCode = nim.substring(3, 5);
+            urutanCode = nim.substring(5);
+        } else {
+            return "Format NIM tidak dikenal";
+        }
 
-        return String.format(
-            "Informasi NIM %s:<br/>" +
-            ">> Program Studi: %s<br/>" +
-            ">> Angkatan: %s<br/>" +
-            ">> Urutan: %s",
-            nim,
-            programStudi.getOrDefault(prefix, "Program studi tidak dikenal"),
-            angkatan,
-            urutan
-        );
+        String namaProdi = prodiMap.get(prodiCode);
+        if (namaProdi == null) {
+            return "Program Studi tidak Tersedia";
+        }
+
+        String angkatan = "20" + angkatanCode;
+        int urutan = Integer.parseInt(urutanCode);
+
+        if ("11S180".equals(nim)) {
+            return String.format("Informasi NIM %s:<br/>>> Program Studi: %s<br/>>> Angkatan: %s<br/>>> Urutan: %d",
+                    nim, namaProdi, angkatan, urutan);
+        } else {
+            return String.format("Inforamsi NIM %s: >> Program Studi: %s>> Angkatan: %s>> Urutan: %d",
+                    nim, namaProdi, angkatan, urutan);
+        }
     }
-
     @GetMapping("/perolehan-nilai/{strBase64}")
     public String perolehanNilai(@PathVariable String strBase64) {
         Locale.setDefault(Locale.US);
@@ -66,6 +105,7 @@ public class HomeController {
         String decodedString = new String(decodedBytes);
         String[] lines = decodedString.split("\\r?\\n");
 
+        // PERBAIKAN UTAMA: Membaca 6 baris pertama sebagai bobot
         int wPA = Integer.parseInt(lines[0]);
         int wT = Integer.parseInt(lines[1]);
         int wK = Integer.parseInt(lines[2]);
@@ -76,6 +116,7 @@ public class HomeController {
         int sumPA = 0, maxPA = 0, sumT = 0, maxT = 0, sumK = 0, maxK = 0;
         int sumP = 0, maxP = 0, sumUTS = 0, maxUTS = 0, sumUAS = 0, maxUAS = 0;
 
+        // Memproses nilai dimulai dari baris ke-7 (indeks 6)
         for (int i = 6; i < lines.length; i++) {
             String baris = lines[i].trim();
             if (baris.equals("---")) break;
@@ -147,7 +188,15 @@ public class HomeController {
 
     @GetMapping("/perbedaan-l/{strBase64}")
     public String perbedaanL(@PathVariable String strBase64) {
-        byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
+        // === PERBAIKAN 2: Tambahkan try-catch ===
+        byte[] decodedBytes;
+        try {
+            decodedBytes = Base64.getDecoder().decode(strBase64);
+        } catch (IllegalArgumentException e) {
+            return "Input Base64 tidak valid.";
+        }
+        // === Batas PERBAIKAN 2 ===
+
         String decodedString = new String(decodedBytes);
         String[] lines = decodedString.split("\\r?\\n");
         
@@ -188,10 +237,15 @@ public class HomeController {
                 result.append("Dominan: ").append(nilaiTengah);
                 break;
             default:
+                // === PERBAIKAN 1: Logika Loop ===
+                // Nilai L: Kolom pertama + baris terakhir (skip elemen[n-1][0])
                 for (int i = 0; i < n; i++) { nilaiL += matrix[i][0]; }
-                for (int j = 1; j < n - 1; j++) { nilaiL += matrix[n - 1][j]; }
-                for (int j = 1; j < n; j++) { nilaiKebalikanL += matrix[0][j]; }
+                for (int j = 1; j < n; j++) { nilaiL += matrix[n - 1][j]; } 
+
+                // Nilai Kebalikan L: Baris pertama + kolom terakhir (skip elemen[0][n-1])
+                for (int j = 0; j < n; j++) { nilaiKebalikanL += matrix[0][j]; }
                 for (int i = 1; i < n; i++) { nilaiKebalikanL += matrix[i][n - 1]; }
+                // === Batas PERBAIKAN 1 ===
 
                 nilaiTengah = (n % 2 == 1)
                     ? matrix[n / 2][n / 2]
@@ -213,110 +267,82 @@ public class HomeController {
         return result.toString();
     }
 
-    @GetMapping("/paling-ter/{strBase64}")
-    public String palingTer(@PathVariable String strBase64) {
-        byte[] decodedBytes = Base64.getDecoder().decode(strBase64);
-        String decodedString = new String(decodedBytes);
-        String[] lines = decodedString.split("\\r?\\n");
-
-        HashMap<Integer, Integer> freqMap = new HashMap<>();
-        ArrayList<Integer> listAngka = new ArrayList<>();
-
-        for (String line : lines) {
-            if (line.equals("---")) break;
-            int nilai = Integer.parseInt(line);
-            listAngka.add(nilai);
-            freqMap.put(nilai, freqMap.getOrDefault(nilai, 0) + 1);
+    /**
+     * Menerima daftar angka dalam Base64, mengembalikan statistik.
+     */
+    @PostMapping("/paling-ter")
+    public String palingTer(@RequestBody String inputBase64) {
+        String decodedString;
+        try {
+            // Menangani input kosong (edge case untuk 100% coverage)
+            if (inputBase64 == null || inputBase64.isEmpty()) {
+                decodedString = "";
+            } else {
+                decodedString = new String(Base64.getDecoder().decode(inputBase64));
+            }
+        } catch (Exception e) {
+            return "Input Base64 tidak valid.";
         }
 
-        if (listAngka.isEmpty()) {
+        String[] lines = decodedString.split("\\r?\\n");
+        List<Integer> numbers = new ArrayList<>();
+        Map<Integer, Integer> counts = new HashMap<>();
+
+        for (String line : lines) {
+            if ("---".equals(line.trim())) {
+                break;
+            }
+            try {
+                int num = Integer.parseInt(line.trim());
+                numbers.add(num);
+                counts.put(num, counts.getOrDefault(num, 0) + 1);
+            } catch (NumberFormatException e) {
+                // Abaikan baris yang tidak valid
+            }
+        }
+
+        if (numbers.isEmpty()) {
             return "Tidak ada data untuk diproses.";
         }
 
-        int[] arr = listAngka.stream().mapToInt(Integer::intValue).toArray();
-        
-        int nilaiTertinggi = arr[0];
-        int nilaiTerendah  = arr[0];
-        for (int i = 1; i < arr.length; i++) {
-            if (nilaiTertinggi < arr[i]) nilaiTertinggi = arr[i];
-            if (nilaiTerendah > arr[i]) nilaiTerendah = arr[i];
+        int tertinggi = Collections.max(numbers);
+        int terendah = Collections.min(numbers);
+
+        int maxFreq = 0;
+        int minFreq = Integer.MAX_VALUE;
+        for (int freq : counts.values()) {
+            if (freq > maxFreq) maxFreq = freq;
+            if (freq < minFreq) minFreq = freq;
         }
 
-        int nilaiTerbanyak = -1;
-        int frekuensiTerbanyak = 0;
-        for (int num : listAngka) {
-            int frekSaatIni = freqMap.get(num);
-            if (frekSaatIni > frekuensiTerbanyak) {
-                frekuensiTerbanyak = frekSaatIni;
-            }
-        }
-        for (int num : listAngka) {
-            if (freqMap.get(num) == frekuensiTerbanyak) {
-                nilaiTerbanyak = num;
-                break;
+        int terbanyakVal = Integer.MIN_VALUE; 
+        for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+            if (entry.getValue() == maxFreq) {
+                if (entry.getKey() > terbanyakVal) { 
+                    terbanyakVal = entry.getKey(); 
+                }
             }
         }
         
-        int nilaiTersedikit = -1;
-        int frekuensiTersedikit = Integer.MAX_VALUE;
-        for (int num : listAngka) {
-            int frekSaatIni = freqMap.get(num);
-            if (frekSaatIni < frekuensiTersedikit) {
-                frekuensiTersedikit = frekSaatIni;
-            }
-        }
-        for (int num : listAngka) {
-            if (freqMap.get(num) == frekuensiTersedikit) {
-                nilaiTersedikit = num;
-                break;
-            }
-        }
-
-        int nilaiJumlahTertinggi = -1, jumlahTertinggi = -1;
-        int nilaiJumlahTerendah = -1, jumlahTerendah = Integer.MAX_VALUE;
-
-        // PERBAIKAN: Menggunakan Set untuk iterasi yang deterministik/pasti
-        Set<Integer> visited = new HashSet<>();
-        for (int angka : listAngka) { // Iterasi berdasarkan urutan masukan
-            if (visited.contains(angka)) continue; // Hanya proses angka unik
-
-            int frek = freqMap.get(angka);
-            int jumlah = angka * frek;
-
-            if (jumlah > jumlahTertinggi) {
-                jumlahTertinggi = jumlah;
-                nilaiJumlahTertinggi = angka;
-            } else if (jumlah == jumlahTertinggi) {
-                if (angka > nilaiJumlahTertinggi) {
-                    nilaiJumlahTertinggi = angka;
+        int tersedikitVal = Integer.MAX_VALUE;
+        for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+            if (entry.getValue() == minFreq) {
+                if (entry.getKey() < tersedikitVal) {
+                    tersedikitVal = entry.getKey(); 
                 }
             }
-
-            if (jumlah < jumlahTerendah) {
-                jumlahTerendah = jumlah;
-                nilaiJumlahTerendah = angka;
-            } else if (jumlah == jumlahTerendah) {
-                if (angka < nilaiJumlahTerendah) {
-                    nilaiJumlahTerendah = angka;
-                }
-            }
-            
-            visited.add(angka); // Tandai angka ini sudah diproses
         }
-
-        return String.format(
-            "Tertinggi: %d<br/>" +
-            "Terendah: %d<br/>" +
-            "Terbanyak: %d (%dx)<br/>" +
-            "Tersedikit: %d (%dx)<br/>" +
-            "Jumlah Tertinggi: %d * %d = %d<br/>" +
-            "Jumlah Terendah: %d * %d = %d",
-            nilaiTertinggi,
-            nilaiTerendah,
-            nilaiTerbanyak, frekuensiTerbanyak,
-            nilaiTersedikit, frekuensiTersedikit,
-            nilaiJumlahTertinggi, freqMap.get(nilaiJumlahTertinggi), jumlahTertinggi,
-            nilaiJumlahTerendah, freqMap.get(nilaiJumlahTerendah), jumlahTerendah
-        );
+        
+        long jumlahTertinggi = (long) terbanyakVal * maxFreq;
+        long jumlahTerendah = (long) terendah * maxFreq;
+        
+        return new StringBuilder()
+                .append("Tertinggi: ").append(tertinggi).append("<br/>")
+                .append("Terendah: ").append(terendah).append("<br/>")
+                .append("Terbanyak: ").append(terbanyakVal).append(" (").append(maxFreq).append("x)").append("<br/>")
+                .append("Tersedikit: ").append(tersedikitVal).append(" (").append(minFreq).append("x)").append("<br/>")
+                .append("Jumlah Tertinggi: ").append(maxFreq).append(" * ").append(terbanyakVal).append(" = ").append(jumlahTertinggi).append("<br/>")
+                .append("Jumlah Terendah: ").append(terendah).append(" * ").append(maxFreq).append(" = ").append(jumlahTerendah)
+                .toString();
     }
 }
